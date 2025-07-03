@@ -213,18 +213,18 @@ export default function AdminPage() {
 
   const getStatusBadge = (status: string, adminVerified: boolean) => {
     if (status === "completed" && adminVerified) {
-      return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Verified</Badge>
+      return <Badge className="bg-green-100 text-green-800 hover:bg-green-100 shadow-none">Verified</Badge>
     }
     if (status === "completed" && !adminVerified) {
-      return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Pending</Badge>
+      return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 shadow-none">Pending</Badge>
     }
     if (status === "pending") {
-      return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Pending</Badge>
+      return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100 shadow-none">Pending</Badge>
     }
     if (status === "failed") {
-      return <Badge variant="destructive">Rejected</Badge>
+      return <Badge variant="destructive" className="shadow-none">Rejected</Badge>
     }
-    return <Badge variant="secondary">Cancelled</Badge>
+    return <Badge variant="secondary" className="shadow-none">Cancelled</Badge>
   }
 
   // Error state
@@ -311,15 +311,15 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <div className="bg-blue-600 p-2 rounded-lg">
+              <div className="bg-black p-2 rounded-lg">
                 <TrendingUp className="h-6 w-6 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-900">Sentient Markets</span>
-              <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Admin</Badge>
+              <Badge className="bg-red-100 text-red-800 hover:bg-red-100 shadow-none">Admin</Badge>
             </div>
             <Button onClick={handleSignOut} variant="ghost" size="sm" className="text-gray-700 hover:text-gray-900">
               <LogOut className="h-4 w-4 mr-2" />
@@ -339,7 +339,7 @@ export default function AdminPage() {
 
           {/* Stats */}
           <div className="grid md:grid-cols-4 gap-6">
-            <Card className="shadow-sm border border-gray-200">
+            <Card className="shadow-none border border-gray-200">
               <CardHeader className="pb-3">
                 <CardTitle className="text-gray-900 text-sm font-medium flex items-center">
                   <CreditCard className="h-4 w-4 mr-2" />
@@ -363,7 +363,7 @@ export default function AdminPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm border border-gray-200">
+            <Card className="shadow-none border border-gray-200">
               <CardHeader className="pb-3">
                 <CardTitle className="text-gray-900 text-sm font-medium flex items-center">
                   <Users className="h-4 w-4 mr-2" />
@@ -375,7 +375,7 @@ export default function AdminPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm border border-gray-200">
+            <Card className="shadow-none border border-gray-200">
               <CardHeader className="pb-3">
                 <CardTitle className="text-gray-900 text-sm font-medium">Total Revenue</CardTitle>
               </CardHeader>
@@ -386,7 +386,7 @@ export default function AdminPage() {
           </div>
 
           {/* Payments Table */}
-          <Card className="shadow-sm border border-gray-200">
+          <Card className="shadow-none border border-gray-200">
             <CardHeader>
               <CardTitle className="text-gray-900">Payment Management</CardTitle>
               <CardDescription className="text-gray-600">Review and verify user payments</CardDescription>

@@ -401,7 +401,7 @@ export default function PaymentPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-3">
-              <div className="bg-blue-600 p-2 rounded-lg">
+              <div className="bg-black p-2 rounded-lg">
                 <TrendingUp className="h-6 w-6 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-900">Sentient Markets</span>
@@ -634,7 +634,7 @@ export default function PaymentPage() {
                           onClick={handleUSDTPayment}
                           disabled={loading || !usdtTxHash.trim()}
                           size="lg"
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                          className="w-full bg-gray-900 hover:bg-black text-white"
                         >
                           {loading ? "Submitting..." : "Submit USDT Payment"}
                         </Button>

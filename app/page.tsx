@@ -98,7 +98,7 @@ console.log(user)
               <CardContent className="p-8 text-center">
                 <div className="mb-6">
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Access</h3>
-                  <div className="text-5xl font-bold text-black mb-2">
+                  <div className="text-5xl font-bold text-blue-600 mb-2">
                     $49<span className="text-xl text-gray-500 font-normal">/month</span>
                   </div>
                   <p className="text-gray-600">Everything you need to succeed</p>
