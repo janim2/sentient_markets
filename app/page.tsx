@@ -152,7 +152,7 @@ console.log(user)
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Sentient Markets?</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Our platform combines cutting-edge technology with expert analysis to give you the edge in today's
+              Our platform combines cutting-edge technology with expert analysis to give you the edge in today&apos;s
               markets.
             </p>
           </div>
