@@ -127,6 +127,7 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Error checking admin status:", error)
 
+    
       let errorMessage = "Failed to verify admin status"
       if (error instanceof Error) {
         if (error.message.includes("recursion") || error.message.includes("policy")) {
@@ -165,6 +166,7 @@ export default function AdminPage() {
       }
 
       console.log("Payments fetched:", data?.length || 0)
+      console.log("Payment Details", data)
       setPayments(data || [])
     } catch (error) {
       console.error("Error fetching payments:", error)

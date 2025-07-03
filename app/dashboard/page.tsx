@@ -563,7 +563,7 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 text-sm mb-4">Contact our support team for any questions or issues.</p>
-                  <Button variant="outline" className="w-full border-gray-300 bg-transparent">
+                  <Button variant="outline" className="w-full border-gray-300 bg-transparent" disabled>
                     Contact Support
                   </Button>
                 </CardContent>
@@ -579,7 +579,8 @@ export default function DashboardPage() {
                   <Button
                     variant="outline"
                     className="w-full border-gray-300 bg-transparent"
-                    disabled={!hasActiveSubscription}
+                    // disabled={!hasActiveSubscription}
+                    disabled
                   >
                     {hasActiveSubscription ? "View Resources" : "Subscribe to Access"}
                   </Button>
