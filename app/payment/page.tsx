@@ -44,7 +44,7 @@ export default function PaymentPage() {
 
     // Check if storage is available
     checkStorageAvailability()
-  }, [user, router])
+  }, [user, router, authLoading])
 
   const checkStorageAvailability = async () => {
     try {
@@ -477,7 +477,7 @@ export default function PaymentPage() {
                 <CardHeader>
                   <CardTitle className="text-gray-900">Select Payment Method</CardTitle>
                   <CardDescription className="text-gray-600">
-                    Choose how you'd like to pay for your subscription
+                    Choose how you&apos;d like to pay for your subscription
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
