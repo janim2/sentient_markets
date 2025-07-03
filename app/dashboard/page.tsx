@@ -49,12 +49,12 @@ interface UserProfile {
 }
 
 export default function DashboardPage() {
-  const { user, signOut } = useAuth()
+  const { user, loading: authLoading, signOut } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
   const [payments, setPayments] = useState<Payment[]>([])
   const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [dataLoading, setDataLoading] = useState(true)
   const [paymentsLoading, setPaymentsLoading] = useState(true)
   const [paymentsError, setPaymentsError] = useState<string | null>(null)
   const [discordInviteCopied, setDiscordInviteCopied] = useState(false)
@@ -63,14 +63,26 @@ export default function DashboardPage() {
   const discordInviteLink = "https://discord.gg/sentientmarkets"
 
   useEffect(() => {
-    if (!user) {
+    // Don't redirect while auth is still loading
+    if (authLoading) {
+      console.log("Auth still loading, waiting...")
+      return
+    }
+
+    // Only redirect if auth is done loading and there's no user
+    if (!authLoading && !user) {
+      console.log("No user found after auth loading completed, redirecting to login")
       router.push("/login")
       return
     }
 
-    fetchUserData()
-    fetchPaymentHistory()
-  }, [user, router])
+    // If we have a user, fetch their data
+    if (user) {
+      console.log("User found, fetching data for:", user.email)
+      fetchUserData()
+      fetchPaymentHistory()
+    }
+  }, [user, authLoading, router])
 
   const fetchUserData = async () => {
     if (!user) return
@@ -138,7 +150,7 @@ export default function DashboardPage() {
         updated_at: new Date().toISOString(),
       })
     } finally {
-      setLoading(false)
+      setDataLoading(false)
     }
   }
 
@@ -257,7 +269,20 @@ export default function DashboardPage() {
     return <Badge variant="secondary">Cancelled</Badge>
   }
 
-  if (loading) {
+  // Show loading while auth is loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-blue-600" />
+          <div className="text-gray-600 text-lg">Checking authentication...</div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show loading while data is loading (but auth is complete)
+  if (dataLoading && user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -268,6 +293,7 @@ export default function DashboardPage() {
     )
   }
 
+  // Don't render anything if no user (redirect should happen in useEffect)
   if (!user || !profile) {
     return null
   }

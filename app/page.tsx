@@ -12,11 +12,11 @@ console.log(user)
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <div className="bg-blue-600 p-2 rounded-lg">
+              <div className="bg-gray-900 p-2 rounded-lg">
                 <TrendingUp className="h-6 w-6 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-900">Sentient Markets</span>
@@ -24,17 +24,17 @@ console.log(user)
             <div className="flex items-center space-x-4">
               {user ? (
                 <Link href="/dashboard">
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">Dashboard</Button>
+                  <Button className="bg-gray-900 hover:bg-black text-white">Dashboard</Button>
                 </Link>
               ) : (
                 <>
                   <Link href="/login">
-                    <Button variant="ghost" className="text-gray-700 hover:text-gray-900">
+                    <Button variant="ghost" className="text-gray-900 hover:text-black">
                       Sign In
                     </Button>
                   </Link>
                   <Link href="/signup">
-                    <Button className="bg-blue-600 hover:bg-blue-700 text-white">Get Started</Button>
+                    <Button className="bg-gray-900 hover:bg-black text-white">Get Started</Button>
                   </Link>
                 </>
               )}
@@ -47,13 +47,13 @@ console.log(user)
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="mb-8">
-            <div className="inline-flex items-center px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-blue-700 text-sm font-medium mb-6">
+            <div className="inline-flex items-center px-4 py-2 bg-black-50 border border-black-200 rounded-full text-black-700 text-sm font-medium mb-6">
               <Star className="h-4 w-4 mr-2" />
-              Trusted by 10,000+ traders worldwide
+              Trusted by 1,000+ traders worldwide
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
               Master the Markets with
-              <span className="text-blue-600 block">Intelligent Insights</span>
+              <span className="text-gray-500 block">Intelligent Insights</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-10 leading-relaxed">
               Join our exclusive community of traders and investors. Get real-time market analysis, live trading
@@ -63,14 +63,14 @@ console.log(user)
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             {user ? (
               <Link href="/dashboard">
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg">
+                <Button size="lg" className="bg-gray-950 hover:bg-black-700 text-white px-8 py-4 text-lg">
                   Go to Dashboard →
                 </Button>
               </Link>
             ) : (
               <>
                 <Link href="/signup">
-                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg">
+                  <Button size="lg" className="bg-gray-900 hover:bg-black text-white px-8 py-4 text-lg">
                     Start Trading Smarter →
                   </Button>
                 </Link>
@@ -94,11 +94,11 @@ console.log(user)
           </div>
 
           <div className="max-w-md mx-auto">
-            <Card className="border-2 border-blue-200 shadow-lg">
+            <Card className="border-2 border-black-200 shadow-lg">
               <CardContent className="p-8 text-center">
                 <div className="mb-6">
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Access</h3>
-                  <div className="text-5xl font-bold text-blue-600 mb-2">
+                  <div className="text-5xl font-bold text-black mb-2">
                     $49<span className="text-xl text-gray-500 font-normal">/month</span>
                   </div>
                   <p className="text-gray-600">Everything you need to succeed</p>
@@ -129,13 +129,13 @@ console.log(user)
 
                 {user ? (
                   <Link href="/payment">
-                    <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                    <Button size="lg" className="w-full bg-gray-900 hover:bg-black text-white">
                       Subscribe Now
                     </Button>
                   </Link>
                 ) : (
                   <Link href="/signup">
-                    <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                    <Button size="lg" className="w-full bg-gray-900 hover:bg-black text-white">
                       Get Started
                     </Button>
                   </Link>
@@ -160,8 +160,8 @@ console.log(user)
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
               <CardContent className="p-8 text-center">
-                <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <BarChart3 className="h-8 w-8 text-blue-600" />
+                <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <BarChart3 className="h-8 w-8 text-gray-600" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">Live Market Analysis</h3>
                 <p className="text-gray-600">
@@ -284,13 +284,13 @@ console.log(user)
           </p>
           {user ? (
             <Link href="/payment">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg">
+              <Button size="lg" className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-4 text-lg">
                 Subscribe Now
               </Button>
             </Link>
           ) : (
             <Link href="/signup">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg">
+              <Button size="lg" className="bg-gray-900 hover:bg-black text-white px-8 py-4 text-lg">
                 Get Started Today
               </Button>
             </Link>
@@ -303,7 +303,7 @@ console.log(user)
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-3 mb-4">
-              <div className="bg-blue-600 p-2 rounded-lg">
+              <div className="bg-gray-600 p-2 rounded-lg">
                 <TrendingUp className="h-5 w-5 text-white" />
               </div>
               <span className="text-lg font-bold text-gray-900">Sentient Markets</span>

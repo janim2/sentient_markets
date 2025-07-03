@@ -52,7 +52,7 @@ interface Payment {
 }
 
 export default function AdminPage() {
-  const { user, signOut } = useAuth()
+  const { user, loading: authLoading, signOut } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
   const [payments, setPayments] = useState<Payment[]>([])
@@ -62,13 +62,25 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!user) {
+    // Don't redirect while auth is still loading
+    if (authLoading) {
+      console.log("Auth still loading, waiting...")
+      return
+    }
+
+    // Only redirect if auth is done loading and there's no user
+    if (!authLoading && !user) {
+      console.log("No user found after auth loading completed, redirecting to login")
       router.push("/login")
       return
     }
 
-    checkAdminStatus()
-  }, [user, router])
+    // If we have a user, check admin status
+    if (user) {
+      console.log("User found, checking admin status for:", user.email)
+      checkAdminStatus()
+    }
+  }, [user, authLoading, router])
 
   const checkAdminStatus = async () => {
     if (!user) return
@@ -253,6 +265,18 @@ export default function AdminPage() {
               )}
             </CardContent>
           </Card>
+        </div>
+      </div>
+    )
+  }
+
+  // Show loading while auth is loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-blue-600" />
+          <div className="text-gray-600 text-lg">Checking authentication...</div>
         </div>
       </div>
     )

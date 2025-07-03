@@ -52,19 +52,19 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-3">
-              <div className="bg-blue-600 p-2 rounded-lg">
+              <div className="bg-black p-2 rounded-lg">
                 <TrendingUp className="h-6 w-6 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-900">Sentient Markets</span>
             </Link>
-            <Link href="/login">
+            <Link href="/">
               <Button variant="ghost" className="text-gray-700 hover:text-gray-900">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Sign In
+                Back to Home
               </Button>
             </Link>
           </div>
@@ -76,8 +76,8 @@ export default function ForgotPasswordPage() {
         <div className="w-full max-w-md">
           <Card className="shadow-lg border border-gray-200">
             <CardHeader className="text-center pb-6">
-              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Mail className="h-8 w-8 text-blue-600" />
+              <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mail className="h-8 w-8 text-gray-600" />
               </div>
               <CardTitle className="text-2xl font-bold text-gray-900">Reset Password</CardTitle>
               <CardDescription className="text-gray-600">
@@ -97,11 +97,11 @@ export default function ForgotPasswordPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      className="border-gray-300 focus:border-gray-500 focus:ring-gray-500"
                       placeholder="Enter your email"
                     />
                   </div>
-                  <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
+                  <Button type="submit" className="w-full bg-gray-900 hover:bg-black text-white" disabled={loading}>
                     {loading ? "Sending..." : "Send Reset Email"}
                   </Button>
                 </form>

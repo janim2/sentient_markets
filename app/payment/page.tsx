@@ -12,13 +12,13 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { TrendingUp, CreditCard, Coins, ArrowLeft, Check, AlertCircle, Upload } from "lucide-react"
+import { TrendingUp, CreditCard, Coins, ArrowLeft, Check, AlertCircle, Upload, FileText } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase"
 
 export default function PaymentPage() {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
   const [paymentMethod, setPaymentMethod] = useState<"paypal" | "usdt">("paypal")
@@ -26,12 +26,153 @@ export default function PaymentPage() {
   const [usdtProof, setUsdtProof] = useState<File | null>(null)
   const [usdtTxHash, setUsdtTxHash] = useState("")
   const [usdtNotes, setUsdtNotes] = useState("")
+  const [storageAvailable, setStorageAvailable] = useState(true)
 
   useEffect(() => {
-    if (!user) {
-      router.push("/login")
+    // Don't redirect while auth is still loading
+    if (authLoading) {
+      console.log("Auth still loading, waiting...")
+      return
     }
+
+    // Only redirect if auth is done loading and there's no user
+    if (!authLoading && !user) {
+      console.log("No user found after auth loading completed, redirecting to login")
+      router.push("/login")
+      return
+      }
+
+    // Check if storage is available
+    checkStorageAvailability()
   }, [user, router])
+
+  const checkStorageAvailability = async () => {
+    try {
+      console.log("=== Storage Availability Check ===")
+
+      // Method 1: Try to list buckets
+      console.log("1. Attempting to list buckets...")
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets()
+
+      console.log("Buckets result:", { buckets, bucketsError })
+
+      if (bucketsError) {
+        console.warn("Cannot list buckets:", bucketsError)
+        // This might be normal - try alternative method
+      } else {
+        console.log("Buckets found:", buckets?.length || 0)
+        buckets?.forEach((bucket) => {
+          console.log(`- Bucket: ${bucket.id} (${bucket.name}) - Public: ${bucket.public}`)
+        })
+      }
+
+      // Method 2: Try to access the specific bucket directly
+      console.log("2. Attempting to access payment-proofs bucket...")
+      const { data: files, error: filesError } = await supabase.storage.from("payment-proofs").list("", { limit: 1 })
+
+      console.log("Files list result:", { files, filesError })
+
+      if (filesError) {
+        console.warn("Cannot access payment-proofs bucket:", filesError)
+
+        // Check specific error types
+        if (filesError.message.includes("Bucket not found")) {
+          console.error("❌ Bucket 'payment-proofs' does not exist")
+          setStorageAvailable(false)
+          return
+        } else if (filesError.message.includes("not allowed") || filesError.message.includes("permission")) {
+          console.warn("⚠️ Bucket exists but access restricted - this is normal for RLS")
+          // Bucket exists but we can't list files due to RLS - that's OK
+          setStorageAvailable(true)
+          return
+        } else {
+          console.error("❌ Unknown storage error:", filesError.message)
+          setStorageAvailable(false)
+          return
+        }
+      } else {
+        console.log("✅ Successfully accessed payment-proofs bucket")
+        console.log("Files in bucket:", files?.length || 0)
+        setStorageAvailable(true)
+        return
+      }
+
+      // Method 3: Try to get bucket info via SQL (if we have access)
+      console.log("3. Attempting to check bucket via database...")
+      const { data: bucketInfo, error: bucketError } = await supabase
+        .from("storage.buckets")
+        .select("id, name, public")
+        .eq("id", "payment-proofs")
+        .single()
+
+      console.log("Bucket info result:", { bucketInfo, bucketError })
+
+      if (bucketError) {
+        console.warn("Cannot query bucket info:", bucketError)
+        // Assume storage is available if we can't check
+        setStorageAvailable(true)
+      } else {
+        console.log("✅ Bucket found in database:", bucketInfo)
+        setStorageAvailable(true)
+      }
+    } catch (error) {
+      console.error("❌ Storage check failed with exception:", error)
+      setStorageAvailable(false)
+    }
+  }
+
+  const testStorageUpload = async () => {
+    if (!user) return
+
+    try {
+      console.log("=== Testing Storage Upload ===")
+
+      // Create a small test file
+      const testContent = "test file content"
+      const testFile = new Blob([testContent], { type: "text/plain" })
+      const testFileName = `${user.id}/test-${Date.now()}.txt`
+
+      console.log("Attempting to upload test file:", testFileName)
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("payment-proofs")
+        .upload(testFileName, testFile, {
+          cacheControl: "3600",
+          upsert: false,
+        })
+
+      if (uploadError) {
+        console.error("❌ Test upload failed:", uploadError)
+
+        if (uploadError.message.includes("Bucket not found")) {
+          console.error("Bucket 'payment-proofs' does not exist!")
+          return false
+        } else if (uploadError.message.includes("not allowed")) {
+          console.error("Upload not allowed - check RLS policies")
+          return false
+        } else {
+          console.error("Unknown upload error:", uploadError.message)
+          return false
+        }
+      } else {
+        console.log("✅ Test upload successful:", uploadData)
+
+        // Clean up test file
+        const { error: deleteError } = await supabase.storage.from("payment-proofs").remove([testFileName])
+
+        if (deleteError) {
+          console.warn("Could not delete test file:", deleteError)
+        } else {
+          console.log("✅ Test file cleaned up")
+        }
+
+        return true
+      }
+    } catch (error) {
+      console.error("❌ Test upload exception:", error)
+      return false
+    }
+  }
 
   const handlePayPalPayment = async () => {
     setLoading(true)
@@ -88,6 +229,54 @@ export default function PaymentPage() {
     }
   }
 
+  const uploadPaymentProof = async (file: File): Promise<string | null> => {
+    if (!storageAvailable) {
+      console.log("Storage not available, skipping file upload")
+      return null
+    }
+
+    try {
+      const fileExt = file.name.split(".").pop()?.toLowerCase()
+      const fileName = `${user?.id}/${Date.now()}.${fileExt}`
+
+      console.log("Uploading file:", fileName)
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("payment-proofs")
+        .upload(fileName, file, {
+          cacheControl: "3600",
+          upsert: false,
+        })
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError)
+
+        // Handle specific storage errors
+        if (uploadError.message.includes("Bucket not found")) {
+          throw new Error("Storage not configured - file upload disabled")
+        } else if (uploadError.message.includes("not allowed")) {
+          throw new Error("File type not allowed - please use JPG, PNG, or PDF")
+        } else if (uploadError.message.includes("too large")) {
+          throw new Error("File too large - maximum 5MB allowed")
+        } else {
+          throw new Error("File upload failed - " + uploadError.message)
+        }
+      }
+
+      console.log("Upload successful:", uploadData)
+
+      // Get public URL
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("payment-proofs").getPublicUrl(fileName)
+
+      return publicUrl
+    } catch (error) {
+      console.error("File upload error:", error)
+      throw error
+    }
+  }
+
   const handleUSDTPayment = async () => {
     if (!usdtTxHash.trim()) {
       toast({
@@ -99,39 +288,55 @@ export default function PaymentPage() {
     }
 
     setLoading(true)
+    let proofUrl = null
+
     try {
-      let proofUrl = null
-
-      // Upload proof file if provided
+      // Upload proof file if provided and storage is available
       if (usdtProof) {
-        const fileExt = usdtProof.name.split(".").pop()
-        const fileName = `${user?.id}_${Date.now()}.${fileExt}`
+        try {
+          proofUrl = await uploadPaymentProof(usdtProof)
+          if (proofUrl) {
+            toast({
+              title: "File Uploaded",
+              description: "Payment proof uploaded successfully",
+            })
+          }
+        } catch (uploadError) {
+          console.error("File upload failed:", uploadError)
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("payment-proofs")
-          .upload(fileName, usdtProof)
+          // Show warning but continue with payment submission
+          toast({
+            title: "File Upload Warning",
+            description:
+              uploadError instanceof Error
+                ? uploadError.message
+                : "File upload failed, but payment will still be submitted",
+            variant: "destructive",
+          })
 
-        if (uploadError) throw uploadError
-
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("payment-proofs").getPublicUrl(fileName)
-
-        proofUrl = publicUrl
+          // Don't return here - continue with payment submission
+        }
       }
 
       // Create payment record
-      const { error } = await supabase.from("payments").insert({
+      const paymentData = {
         user_id: user?.id,
-        payment_method: "usdt",
+        payment_method: "usdt" as const,
         amount: 49.0,
         currency: "USDT",
-        status: "pending",
+        status: "pending" as const,
         payment_proof_url: proofUrl,
         admin_verified: false,
-      })
+      }
 
-      if (error) throw error
+      console.log("Creating payment record:", paymentData)
+
+      const { error: paymentError } = await supabase.from("payments").insert(paymentData)
+
+      if (paymentError) {
+        console.error("Payment creation error:", paymentError)
+        throw new Error("Failed to create payment record: " + paymentError.message)
+      }
 
       toast({
         title: "USDT Payment Submitted",
@@ -141,9 +346,15 @@ export default function PaymentPage() {
       router.push("/dashboard")
     } catch (error) {
       console.error("USDT payment error:", error)
+
+      let errorMessage = "There was an error submitting your USDT payment. Please try again."
+      if (error instanceof Error) {
+        errorMessage = error.message
+      }
+
       toast({
         title: "Submission Failed",
-        description: "There was an error submitting your USDT payment. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       })
     } finally {
@@ -153,18 +364,30 @@ export default function PaymentPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      // Check file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "File Too Large",
-          description: "Please select a file smaller than 5MB.",
-          variant: "destructive",
-        })
-        return
-      }
-      setUsdtProof(file)
+    if (!file) return
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Please select a file smaller than 5MB.",
+        variant: "destructive",
+      })
+      return
     }
+
+    // Check file type
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"]
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please select a JPG, PNG, GIF, WebP, or PDF file.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setUsdtProof(file)
   }
 
   if (!user) {
@@ -174,7 +397,7 @@ export default function PaymentPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-3">
@@ -200,6 +423,17 @@ export default function PaymentPage() {
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Subscribe to Premium</h1>
             <p className="text-xl text-gray-600">Choose your payment method to access exclusive trading insights</p>
           </div>
+
+          {/* Storage Warning */}
+          {!storageAvailable && (
+            <Alert className="border-yellow-200 bg-yellow-50">
+              <AlertCircle className="h-4 w-4 text-yellow-600" />
+              <AlertDescription className="text-yellow-800">
+                <strong>Note:</strong> File upload is currently unavailable. You can still submit USDT payments with
+                transaction hash, but file proof upload is disabled.
+              </AlertDescription>
+            </Alert>
+          )}
 
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Pricing Card */}
@@ -309,7 +543,8 @@ export default function PaymentPage() {
                           <strong>USDT Payment Instructions:</strong>
                           <ol className="mt-2 space-y-1 list-decimal list-inside text-sm">
                             <li>Send exactly $49 USDT to our wallet address below</li>
-                            <li>Upload payment proof and provide transaction hash</li>
+                            <li>Provide the transaction hash (required)</li>
+                            <li>Upload payment proof if possible (optional)</li>
                             <li>Wait for admin verification (usually within 24 hours)</li>
                           </ol>
                         </AlertDescription>
@@ -336,34 +571,45 @@ export default function PaymentPage() {
                             className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                             required
                           />
+                          <p className="text-gray-500 text-xs mt-1">This is required for payment verification</p>
                         </div>
 
                         <div>
                           <Label htmlFor="proof" className="text-gray-700 font-medium">
-                            Payment Proof (Optional)
+                            Payment Proof {storageAvailable ? "(Optional)" : "(Unavailable)"}
                           </Label>
                           <div className="mt-2">
-                            <div className="flex items-center justify-center w-full">
-                              <label
-                                htmlFor="proof"
-                                className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
-                              >
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                  <Upload className="w-8 h-8 mb-2 text-gray-400" />
-                                  <p className="mb-2 text-sm text-gray-500">
-                                    <span className="font-semibold">Click to upload</span> payment screenshot
-                                  </p>
-                                  <p className="text-xs text-gray-500">PNG, JPG or PDF (MAX. 5MB)</p>
+                            {storageAvailable ? (
+                              <div className="flex items-center justify-center w-full">
+                                <label
+                                  htmlFor="proof"
+                                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                                >
+                                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <Upload className="w-8 h-8 mb-2 text-gray-400" />
+                                    <p className="mb-2 text-sm text-gray-500">
+                                      <span className="font-semibold">Click to upload</span> payment screenshot
+                                    </p>
+                                    <p className="text-xs text-gray-500">PNG, JPG, WebP or PDF (MAX. 5MB)</p>
+                                  </div>
+                                  <Input
+                                    id="proof"
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    accept="image/*,.pdf"
+                                    className="hidden"
+                                  />
+                                </label>
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-center w-full h-32 border-2 border-gray-200 border-dashed rounded-lg bg-gray-100">
+                                <div className="text-center">
+                                  <FileText className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                                  <p className="text-sm text-gray-500">File upload temporarily unavailable</p>
+                                  <p className="text-xs text-gray-400">You can still submit with transaction hash</p>
                                 </div>
-                                <Input
-                                  id="proof"
-                                  type="file"
-                                  onChange={handleFileChange}
-                                  accept="image/*,.pdf"
-                                  className="hidden"
-                                />
-                              </label>
-                            </div>
+                              </div>
+                            )}
                             {usdtProof && (
                               <p className="text-sm text-green-600 mt-2">✓ File selected: {usdtProof.name}</p>
                             )}
@@ -378,7 +624,7 @@ export default function PaymentPage() {
                             id="notes"
                             value={usdtNotes}
                             onChange={(e) => setUsdtNotes(e.target.value)}
-                            placeholder="Any additional information about your payment"
+                            placeholder="Any additional information about your payment (e.g., screenshot description if upload failed)"
                             className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                             rows={3}
                           />
