@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { BarChart3, Users, Shield, Check, TrendingUp, Star } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/contexts/auth-context"
+import Image from "next/image"
 
 export default function LandingPage() {
   const { user } = useAuth()
@@ -16,9 +17,7 @@ console.log(user)
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <div className="bg-gray-900 p-2 rounded-lg">
-                <TrendingUp className="h-6 w-6 text-white" />
-              </div>
+              <Image src="/logo.png" alt="Logo" width={40} height={50}/>    
               <span className="text-xl font-bold text-gray-900">Sentient Markets</span>
             </div>
             <div className="flex items-center space-x-4">
@@ -99,7 +98,7 @@ console.log(user)
                 <div className="mb-6">
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Access</h3>
                   <div className="text-5xl font-bold text-blue-600 mb-2">
-                    $49<span className="text-xl text-gray-500 font-normal">/month</span>
+                    $1,000<span className="text-xl text-gray-500 font-normal">/3month</span>
                   </div>
                   <p className="text-gray-600">Everything you need to succeed</p>
                 </div>
@@ -284,7 +283,7 @@ console.log(user)
           </p>
           {user ? (
             <Link href="/payment">
-              <Button size="lg" className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-4 text-lg">
+              <Button size="lg" className="bg-gray-900 hover:bg-black text-white px-8 py-4 text-lg">
                 Subscribe Now
               </Button>
             </Link>
@@ -303,9 +302,7 @@ console.log(user)
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-3 mb-4">
-              <div className="bg-gray-600 p-2 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-white" />
-              </div>
+              <Image src="/logo.png" alt="Logo" width={40} height={50} />
               <span className="text-lg font-bold text-gray-900">Sentient Markets</span>
             </div>
             <p className="text-gray-600">

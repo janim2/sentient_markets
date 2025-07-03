@@ -244,7 +244,7 @@ export default function DashboardPage() {
   const getStatusBadge = (status: string, adminVerified: boolean) => {
     if (status === "completed" && adminVerified) {
       return (
-        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+        <Badge className="bg-green-100 text-green-800 hover:bg-green-100 shadow-none">
           <CheckCircle className="h-3 w-3 mr-1" />
           Active
         </Badge>
@@ -252,7 +252,7 @@ export default function DashboardPage() {
     }
     if (status === "pending" || (status === "completed" && !adminVerified)) {
       return (
-        <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
+        <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 shadow-none">
           <Clock className="h-3 w-3 mr-1" />
           Pending Verification
         </Badge>
@@ -303,11 +303,11 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-3">
-              <div className="bg-blue-600 p-2 rounded-lg">
+              <div className="bg-black p-2 rounded-lg">
                 <TrendingUp className="h-6 w-6 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-900">Sentient Markets</span>
@@ -373,7 +373,7 @@ export default function DashboardPage() {
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
               {/* Subscription Status */}
-              <Card className="shadow-sm border border-gray-200">
+              <Card className="shadow-none border border-gray-200">
                 <CardHeader>
                   <CardTitle className="flex items-center text-gray-900">
                     <CreditCard className="h-5 w-5 mr-2" />
@@ -385,11 +385,11 @@ export default function DashboardPage() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="text-gray-600">Status:</span>
-                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Premium Active</Badge>
+                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100 shadow-none">Premium Active</Badge>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-600">Plan:</span>
-                        <span className="text-gray-900 font-medium">Premium Access - $49/month</span>
+                        <span className="text-gray-900 font-medium">Premium Access - $1,000/3month</span>
                       </div>
                       <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                         <p className="text-green-800 text-sm">
@@ -417,7 +417,7 @@ export default function DashboardPage() {
               </Card>
 
               {/* Discord Access */}
-              <Card className="shadow-sm border border-gray-200">
+              <Card className="shadow-none border border-gray-200">
                 <CardHeader>
                   <CardTitle className="flex items-center text-gray-900">
                     <Users className="h-5 w-5 mr-2" />
@@ -469,7 +469,7 @@ export default function DashboardPage() {
               </Card>
 
               {/* Payment History */}
-              <Card className="shadow-sm border border-gray-200">
+              <Card className="shadow-none border border-gray-200">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
@@ -538,7 +538,7 @@ export default function DashboardPage() {
             {/* Sidebar */}
             <div className="space-y-6">
               {/* Quick Actions */}
-              <Card className="shadow-sm border border-gray-200">
+              <Card className="shadow-none border border-gray-200">
                 <CardHeader>
                   <CardTitle className="text-gray-900 text-lg">Quick Actions</CardTitle>
                 </CardHeader>
@@ -557,7 +557,7 @@ export default function DashboardPage() {
               </Card>
 
               {/* Support */}
-              <Card className="shadow-sm border border-gray-200">
+              <Card className="shadow-none border border-gray-200">
                 <CardHeader>
                   <CardTitle className="text-gray-900 text-lg">Need Help?</CardTitle>
                 </CardHeader>
@@ -570,7 +570,7 @@ export default function DashboardPage() {
               </Card>
 
               {/* Trading Resources */}
-              <Card className="shadow-sm border border-gray-200">
+              <Card className="shadow-none border border-gray-200">
                 <CardHeader>
                   <CardTitle className="text-gray-900 text-lg">Trading Resources</CardTitle>
                 </CardHeader>

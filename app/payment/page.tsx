@@ -16,6 +16,7 @@ import { TrendingUp, CreditCard, Coins, ArrowLeft, Check, AlertCircle, Upload, F
 import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase"
+import Image from "next/image"
 
 export default function PaymentPage() {
   const { user, loading: authLoading } = useAuth()
@@ -183,7 +184,7 @@ export default function PaymentPage() {
         .insert({
           user_id: user?.id,
           payment_method: "paypal",
-          amount: 49.0,
+          amount: 1000.0,
           currency: "USD",
           status: "pending",
         })
@@ -322,7 +323,7 @@ export default function PaymentPage() {
       const paymentData = {
         user_id: user?.id,
         payment_method: "usdt" as const,
-        amount: 49.0,
+        amount: 1000.0,
         currency: "USDT",
         status: "pending" as const,
         payment_proof_url: proofUrl,
@@ -401,9 +402,7 @@ export default function PaymentPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-3">
-              <div className="bg-black p-2 rounded-lg">
-                <TrendingUp className="h-6 w-6 text-white" />
-              </div>
+               <Image src="/logo.png" alt="Logo" width={40} height={50}/>   
               <span className="text-xl font-bold text-gray-900">Sentient Markets</span>
             </Link>
             <Link href="/dashboard">
@@ -442,7 +441,7 @@ export default function PaymentPage() {
                 <CardHeader className="text-center">
                   <CardTitle className="text-2xl text-gray-900">Premium Access</CardTitle>
                   <div className="text-4xl font-bold text-blue-600 mb-2">
-                    $49<span className="text-lg text-gray-500 font-normal">/month</span>
+                    $1,000<span className="text-lg text-gray-500 font-normal">/3month</span>
                   </div>
                   <CardDescription className="text-gray-600">
                     Full access to trading community and premium features
@@ -529,7 +528,7 @@ export default function PaymentPage() {
                         size="lg"
                         className="w-full bg-[#0070ba] hover:bg-[#005ea6] text-white"
                       >
-                        {loading ? "Processing..." : "Pay with PayPal - $49.00"}
+                        {loading ? "Processing..." : "Pay with PayPal - $1,000.00"}
                       </Button>
                     </div>
                   )}
@@ -542,7 +541,7 @@ export default function PaymentPage() {
                         <AlertDescription className="text-yellow-800">
                           <strong>USDT Payment Instructions:</strong>
                           <ol className="mt-2 space-y-1 list-decimal list-inside text-sm">
-                            <li>Send exactly $49 USDT to our wallet address below</li>
+                            <li>Send exactly $1,000 USDT to our wallet address below</li>
                             <li>Provide the transaction hash (required)</li>
                             <li>Upload payment proof if possible (optional)</li>
                             <li>Wait for admin verification (usually within 24 hours)</li>

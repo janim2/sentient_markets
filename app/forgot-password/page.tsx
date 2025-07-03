@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { TrendingUp, ArrowLeft, Mail } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
+import Image from "next/image"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
@@ -56,9 +57,7 @@ export default function ForgotPasswordPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-3">
-              <div className="bg-black p-2 rounded-lg">
-                <TrendingUp className="h-6 w-6 text-white" />
-              </div>
+               <Image src="/logo.png" alt="Logo" width={40} height={50}/>   
               <span className="text-xl font-bold text-gray-900">Sentient Markets</span>
             </Link>
             <Link href="/">

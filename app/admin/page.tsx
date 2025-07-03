@@ -32,6 +32,7 @@ import {
 import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase"
+import Image from "next/image"
 
 interface Payment {
   id: string
@@ -315,9 +316,7 @@ export default function AdminPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <div className="bg-black p-2 rounded-lg">
-                <TrendingUp className="h-6 w-6 text-white" />
-              </div>
+               <Image src="/logo.png" alt="Logo" width={40} height={50}/>   
               <span className="text-xl font-bold text-gray-900">Sentient Markets</span>
               <Badge className="bg-red-100 text-red-800 hover:bg-red-100 shadow-none">Admin</Badge>
             </div>
