@@ -1,113 +1,319 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { BarChart3, Users, Shield, Check, TrendingUp, Star } from "lucide-react"
+import Link from "next/link"
+import { useAuth } from "@/contexts/auth-context"
+
+export default function LandingPage() {
+  const { user } = useAuth()
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-3">
+              <div className="bg-blue-600 p-2 rounded-lg">
+                <TrendingUp className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-xl font-bold text-gray-900">Sentient Markets</span>
+            </div>
+            <div className="flex items-center space-x-4">
+              {user ? (
+                <Link href="/dashboard">
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">Dashboard</Button>
+                </Link>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <Button variant="ghost" className="text-gray-700 hover:text-gray-900">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link href="/signup">
+                    <Button className="bg-blue-600 hover:bg-blue-700 text-white">Get Started</Button>
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      </header>
 
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+      {/* Hero Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="mb-8">
+            <div className="inline-flex items-center px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-blue-700 text-sm font-medium mb-6">
+              <Star className="h-4 w-4 mr-2" />
+              Trusted by 10,000+ traders worldwide
+            </div>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Master the Markets with
+              <span className="text-blue-600 block">Intelligent Insights</span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-10 leading-relaxed">
+              Join our exclusive community of traders and investors. Get real-time market analysis, live trading
+              sessions, and expert commentary to elevate your trading game.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            {user ? (
+              <Link href="/dashboard">
+                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg">
+                  Go to Dashboard →
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/signup">
+                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg">
+                    Start Trading Smarter →
+                  </Button>
+                </Link>
+                <Link href="/login">
+                  <Button size="lg" variant="outline" className="px-8 py-4 text-lg border-gray-300 bg-transparent">
+                    Sign In
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </section>
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
+      {/* Pricing Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h2>
+            <p className="text-xl text-gray-600">Get access to our exclusive trading community and premium insights.</p>
+          </div>
+
+          <div className="max-w-md mx-auto">
+            <Card className="border-2 border-blue-200 shadow-lg">
+              <CardContent className="p-8 text-center">
+                <div className="mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Access</h3>
+                  <div className="text-5xl font-bold text-blue-600 mb-2">
+                    $49<span className="text-xl text-gray-500 font-normal">/month</span>
+                  </div>
+                  <p className="text-gray-600">Everything you need to succeed</p>
+                </div>
+
+                <ul className="space-y-4 mb-8 text-left">
+                  <li className="flex items-center text-gray-700">
+                    <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                    Live trading sessions with experts
+                  </li>
+                  <li className="flex items-center text-gray-700">
+                    <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                    Exclusive Discord community access
+                  </li>
+                  <li className="flex items-center text-gray-700">
+                    <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                    Real-time market analysis & alerts
+                  </li>
+                  <li className="flex items-center text-gray-700">
+                    <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                    Trading guides & educational resources
+                  </li>
+                  <li className="flex items-center text-gray-700">
+                    <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                    Personal trading dashboard
+                  </li>
+                </ul>
+
+                {user ? (
+                  <Link href="/payment">
+                    <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                      Subscribe Now
+                    </Button>
+                  </Link>
+                ) : (
+                  <Link href="/signup">
+                    <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                      Get Started
+                    </Button>
+                  </Link>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Sentient Markets?</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Our platform combines cutting-edge technology with expert analysis to give you the edge in today's
+              markets.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-8 text-center">
+                <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <BarChart3 className="h-8 w-8 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Live Market Analysis</h3>
+                <p className="text-gray-600">
+                  Real-time market insights and technical analysis from experienced traders and analysts.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-8 text-center">
+                <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Users className="h-8 w-8 text-green-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Expert Community</h3>
+                <p className="text-gray-600">
+                  Connect with professional traders and learn from their strategies and market insights.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-8 text-center">
+                <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Shield className="h-8 w-8 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Secure Platform</h3>
+                <p className="text-gray-600">
+                  Bank-level security with encrypted data and secure payment processing for your peace of mind.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Everything You Need to Succeed</h2>
+            <p className="text-xl text-gray-600">
+              Comprehensive tools and resources to elevate your trading performance.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <div className="flex items-start space-x-4">
+                <div className="bg-green-100 p-2 rounded-full flex-shrink-0">
+                  <Check className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-1">Live Trading Sessions</h4>
+                  <p className="text-gray-600">Watch and learn from market experts in real-time trading sessions.</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-4">
+                <div className="bg-green-100 p-2 rounded-full flex-shrink-0">
+                  <Check className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-1">Discord Community</h4>
+                  <p className="text-gray-600">Join our exclusive Discord server with 24/7 market discussions.</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-4">
+                <div className="bg-green-100 p-2 rounded-full flex-shrink-0">
+                  <Check className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-1">Market Alerts</h4>
+                  <p className="text-gray-600">
+                    Get instant notifications for important market movements and opportunities.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex items-start space-x-4">
+                <div className="bg-green-100 p-2 rounded-full flex-shrink-0">
+                  <Check className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-1">Expert Analysis</h4>
+                  <p className="text-gray-600">
+                    Daily market commentary and technical analysis from seasoned professionals.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-4">
+                <div className="bg-green-100 p-2 rounded-full flex-shrink-0">
+                  <Check className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-1">Educational Resources</h4>
+                  <p className="text-gray-600">Comprehensive trading guides and tutorials for all skill levels.</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-4">
+                <div className="bg-green-100 p-2 rounded-full flex-shrink-0">
+                  <Check className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-1">Trading Dashboard</h4>
+                  <p className="text-gray-600">Personal analytics and performance tracking tools.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to Transform Your Trading?</h2>
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Join thousands of successful traders who trust Sentient Markets for their trading insights.
           </p>
-        </a>
+          {user ? (
+            <Link href="/payment">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg">
+                Subscribe Now
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/signup">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg">
+                Get Started Today
+              </Button>
+            </Link>
+          )}
+        </div>
+      </section>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center">
+            <div className="flex items-center justify-center space-x-3 mb-4">
+              <div className="bg-blue-600 p-2 rounded-lg">
+                <TrendingUp className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-lg font-bold text-gray-900">Sentient Markets</span>
+            </div>
+            <p className="text-gray-600">
+              © 2025 Sentient Markets. All rights reserved. Empowering traders with intelligent market insights.
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  )
 }
