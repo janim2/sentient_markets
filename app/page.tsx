@@ -94,7 +94,7 @@ console.log(user)
           </div>
 
           <div className="max-w-md mx-auto">
-            <Card className="border-2 border-black-200 shadow-lg">
+            <Card className="border-2 border-black-200 shadow-none">
               <CardContent className="p-8 text-center">
                 <div className="mb-6">
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Access</h3>
@@ -158,7 +158,7 @@ console.log(user)
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <Card className="border border-gray-200 shadow-none hover:shadow-md transition-shadow">
               <CardContent className="p-8 text-center">
                 <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                   <BarChart3 className="h-8 w-8 text-gray-600" />
