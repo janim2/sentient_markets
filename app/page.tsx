@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/auth-context"
 
 export default function LandingPage() {
   const { user } = useAuth()
-
+console.log(user)
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}

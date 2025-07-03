@@ -7,38 +7,59 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { TrendingUp, LogOut, CreditCard, Users, ExternalLink, Copy, Check, AlertCircle, Settings } from "lucide-react"
+import {
+  TrendingUp,
+  LogOut,
+  CreditCard,
+  Clock,
+  CheckCircle,
+  XCircle,
+  ExternalLink,
+  AlertCircle,
+  RefreshCw,
+  Users,
+  Copy,
+  Check,
+  Settings,
+} from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase"
 
 interface Payment {
   id: string
+  user_id: string
   payment_method: "paypal" | "usdt"
   amount: number
   currency: string
   status: "pending" | "completed" | "failed" | "cancelled"
+  payment_proof_url: string | null
+  paypal_payment_id: string | null
   discord_invite_sent: boolean
   admin_verified: boolean
   created_at: string
 }
 
-interface Profile {
+interface UserProfile {
   id: string
   email: string | null
   full_name: string | null
+  created_at: string
+  updated_at: string
 }
 
 export default function DashboardPage() {
   const { user, signOut } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
-  const [profile, setProfile] = useState<Profile | null>(null)
   const [payments, setPayments] = useState<Payment[]>([])
+  const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [paymentsLoading, setPaymentsLoading] = useState(true)
+  const [paymentsError, setPaymentsError] = useState<string | null>(null)
   const [discordInviteCopied, setDiscordInviteCopied] = useState(false)
 
-  // Discord invite link (you would replace this with your actual Discord invite)
+  // Discord invite link
   const discordInviteLink = "https://discord.gg/sentientmarkets"
 
   useEffect(() => {
@@ -48,44 +69,146 @@ export default function DashboardPage() {
     }
 
     fetchUserData()
+    fetchPaymentHistory()
   }, [user, router])
 
   const fetchUserData = async () => {
+    if (!user) return
+
     try {
-      // Fetch profile
+      console.log("Fetching user profile for:", user.id)
+
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", user?.id)
+        .eq("id", user.id)
         .single()
 
-      if (profileError) throw profileError
-      setProfile(profileData)
+      if (profileError) {
+        console.error("Profile fetch error:", profileError)
 
-      // Fetch payments
-      const { data: paymentsData, error: paymentsError } = await supabase
-        .from("payments")
-        .select("*")
-        .eq("user_id", user?.id)
-        .order("created_at", { ascending: false })
+        // If profile doesn't exist, create one
+        if (profileError.code === "PGRST116") {
+          console.log("Profile not found, creating one...")
+          const { data: newProfile, error: createError } = await supabase
+            .from("profiles")
+            .insert({
+              id: user.id,
+              email: user.email,
+              full_name: user.user_metadata?.full_name || null,
+            })
+            .select()
+            .single()
 
-      if (paymentsError) throw paymentsError
-      setPayments(paymentsData || [])
+          if (createError) {
+            console.error("Error creating profile:", createError)
+            // Use fallback data from user metadata
+            setProfile({
+              id: user.id,
+              email: user.email || null,
+              full_name: user.user_metadata?.full_name || null,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+          } else {
+            setProfile(newProfile)
+          }
+        } else {
+          // Use fallback data from user metadata
+          setProfile({
+            id: user.id,
+            email: user.email || null,
+            full_name: user.user_metadata?.full_name || null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+        }
+      } else {
+        setProfile(profileData)
+      }
     } catch (error) {
       console.error("Error fetching user data:", error)
-      toast({
-        title: "Error",
-        description: "Failed to load user data",
-        variant: "destructive",
+
+      // Use fallback data from user metadata
+      setProfile({
+        id: user.id,
+        email: user.email || null,
+        full_name: user.user_metadata?.full_name || null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
     } finally {
       setLoading(false)
     }
   }
 
+  const fetchPaymentHistory = async () => {
+    if (!user) return
+
+    setPaymentsLoading(true)
+    setPaymentsError(null)
+
+    try {
+      console.log("Fetching payment history for:", user.id)
+
+      const { data: paymentsData, error: paymentsError } = await supabase
+        .from("payments")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+
+      if (paymentsError) {
+        console.error("Payments fetch error:", paymentsError)
+
+        // Handle specific error types
+        if (paymentsError.message.includes("recursion") || paymentsError.message.includes("policy")) {
+          setPaymentsError("Database configuration issue - please contact support")
+        } else if (paymentsError.code === "PGRST301") {
+          setPaymentsError("Permission denied - please check your account status")
+        } else {
+          setPaymentsError("Failed to load payment history")
+        }
+
+        // Set empty array so UI can still function
+        setPayments([])
+      } else {
+        console.log("Payments fetched:", paymentsData?.length || 0)
+        setPayments(paymentsData || [])
+        setPaymentsError(null)
+      }
+    } catch (error) {
+      console.error("Error fetching payment history:", error)
+
+      let errorMessage = "Failed to load payment history"
+      if (error instanceof Error) {
+        if (error.message.includes("recursion") || error.message.includes("policy")) {
+          errorMessage = "Database configuration issue - please contact support"
+        } else if (error.message.includes("Failed to fetch")) {
+          errorMessage = "Network connection issue - please check your internet"
+        } else {
+          errorMessage = error.message
+        }
+      }
+
+      setPaymentsError(errorMessage)
+      setPayments([])
+    } finally {
+      setPaymentsLoading(false)
+    }
+  }
+
+  const retryFetchPayments = () => {
+    fetchPaymentHistory()
+  }
+
   const handleSignOut = async () => {
-    await signOut()
-    router.push("/")
+    try {
+      await signOut()
+      router.push("/")
+    } catch (error) {
+      console.error("Sign out error:", error)
+      router.push("/")
+    }
   }
 
   const copyDiscordInvite = async () => {
@@ -106,20 +229,30 @@ export default function DashboardPage() {
     }
   }
 
-  const hasActiveSubscription = payments.some((payment) => payment.status === "completed" && payment.admin_verified)
-
   const getStatusBadge = (status: string, adminVerified: boolean) => {
     if (status === "completed" && adminVerified) {
-      return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Active</Badge>
+      return (
+        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+          <CheckCircle className="h-3 w-3 mr-1" />
+          Active
+        </Badge>
+      )
     }
-    if (status === "completed" && !adminVerified) {
-      return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Pending Verification</Badge>
-    }
-    if (status === "pending") {
-      return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Pending</Badge>
+    if (status === "pending" || (status === "completed" && !adminVerified)) {
+      return (
+        <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
+          <Clock className="h-3 w-3 mr-1" />
+          Pending Verification
+        </Badge>
+      )
     }
     if (status === "failed") {
-      return <Badge variant="destructive">Failed</Badge>
+      return (
+        <Badge variant="destructive">
+          <XCircle className="h-3 w-3 mr-1" />
+          Failed
+        </Badge>
+      )
     }
     return <Badge variant="secondary">Cancelled</Badge>
   }
@@ -127,10 +260,19 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600 text-lg">Loading...</div>
+        <div className="text-center space-y-4">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-blue-600" />
+          <div className="text-gray-600 text-lg">Loading your dashboard...</div>
+        </div>
       </div>
     )
   }
+
+  if (!user || !profile) {
+    return null
+  }
+
+  const hasActiveSubscription = payments.some((payment) => payment.status === "completed" && payment.admin_verified)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -145,7 +287,12 @@ export default function DashboardPage() {
               <span className="text-xl font-bold text-gray-900">Sentient Markets</span>
             </Link>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-600 text-sm hidden sm:block">Welcome, {profile?.full_name || "Trader"}</span>
+              <span className="text-gray-600 text-sm hidden sm:block">
+                Welcome, {profile.full_name || profile.email?.split("@")[0] || "Trader"}
+              </span>
+              <Button onClick={retryFetchPayments} variant="ghost" size="sm" title="Refresh data">
+                <RefreshCw className="h-4 w-4" />
+              </Button>
               <Button onClick={handleSignOut} variant="ghost" size="sm" className="text-gray-700 hover:text-gray-900">
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
@@ -173,6 +320,25 @@ export default function DashboardPage() {
                 <Link href="/payment" className="font-medium underline hover:no-underline">
                   Subscribe here
                 </Link>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Payment Error Alert */}
+          {paymentsError && (
+            <Alert className="border-yellow-200 bg-yellow-50">
+              <AlertCircle className="h-4 w-4 text-yellow-600" />
+              <AlertDescription className="text-yellow-800">
+                <div className="flex items-center justify-between">
+                  <span>
+                    <strong>Warning:</strong> Could not load payment history. Some features may be limited.{" "}
+                    {paymentsError}
+                  </span>
+                  <Button onClick={retryFetchPayments} size="sm" variant="outline" className="ml-4 bg-transparent">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Retry
+                  </Button>
+                </div>
               </AlertDescription>
             </Alert>
           )}
@@ -279,13 +445,46 @@ export default function DashboardPage() {
               {/* Payment History */}
               <Card className="shadow-sm border border-gray-200">
                 <CardHeader>
-                  <CardTitle className="text-gray-900">Payment History</CardTitle>
-                  <CardDescription className="text-gray-600">
-                    View your subscription payments and status
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-gray-900">Payment History</CardTitle>
+                      <CardDescription className="text-gray-600">
+                        View your subscription payments and status
+                      </CardDescription>
+                    </div>
+                    {!paymentsLoading && (
+                      <Button onClick={retryFetchPayments} size="sm" variant="outline">
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Refresh
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  {payments.length > 0 ? (
+                  {paymentsLoading ? (
+                    <div className="text-center py-8">
+                      <RefreshCw className="h-6 w-6 animate-spin mx-auto text-blue-600 mb-4" />
+                      <p className="text-gray-600">Loading payment history...</p>
+                    </div>
+                  ) : paymentsError ? (
+                    <div className="text-center py-8">
+                      <AlertCircle className="h-8 w-8 mx-auto text-red-500 mb-4" />
+                      <p className="text-gray-600 mb-4">Failed to load payment history</p>
+                      <p className="text-gray-500 text-sm mb-4">{paymentsError}</p>
+                      <Button onClick={retryFetchPayments} variant="outline">
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Try Again
+                      </Button>
+                    </div>
+                  ) : payments.length === 0 ? (
+                    <div className="text-center py-8">
+                      <CreditCard className="h-8 w-8 mx-auto text-gray-400 mb-4" />
+                      <p className="text-gray-600 mb-4">No payments found</p>
+                      <Link href="/payment">
+                        <Button className="bg-blue-600 hover:bg-blue-700 text-white">Make Your First Payment</Button>
+                      </Link>
+                    </div>
+                  ) : (
                     <div className="space-y-4">
                       {payments.map((payment) => (
                         <div
@@ -304,13 +503,6 @@ export default function DashboardPage() {
                           <div className="text-right">{getStatusBadge(payment.status, payment.admin_verified)}</div>
                         </div>
                       ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-gray-500 mb-4">No payments yet</p>
-                      <Link href="/payment">
-                        <Button className="bg-blue-600 hover:bg-blue-700 text-white">Make Your First Payment</Button>
-                      </Link>
                     </div>
                   )}
                 </CardContent>

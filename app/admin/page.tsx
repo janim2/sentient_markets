@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   Dialog,
   DialogContent,
@@ -15,7 +16,19 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { TrendingUp, LogOut, Eye, Check, X, ExternalLink, Users, CreditCard, Clock } from "lucide-react"
+import {
+  TrendingUp,
+  LogOut,
+  Eye,
+  Check,
+  X,
+  ExternalLink,
+  Users,
+  CreditCard,
+  Clock,
+  AlertCircle,
+  RefreshCw,
+} from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase"
@@ -46,6 +59,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) {
@@ -57,29 +71,65 @@ export default function AdminPage() {
   }, [user, router])
 
   const checkAdminStatus = async () => {
-    try {
-      // Check if user is admin
-      const { data: adminData, error: adminError } = await supabase
-        .from("admin_users")
-        .select("*")
-        .eq("id", user?.id)
-        .single()
+    if (!user) return
 
-      if (adminError || !adminData) {
+    try {
+      console.log("Checking admin status for user:", user.id)
+
+      // Use the safe function to check admin status
+      const { data: adminCheck, error: adminError } = await supabase.rpc("check_admin_status", {
+        user_id: user.id,
+      })
+
+      console.log("Admin check result:", { adminCheck, adminError })
+
+      if (adminError) {
+        console.error("Admin check error:", adminError)
+
+        // Check if it's a function not found error
+        if (adminError.message.includes("function") && adminError.message.includes("does not exist")) {
+          setError("Database function missing - please run the RLS fix script")
+          return
+        }
+
+        // Check if it's a recursion or policy error
+        if (adminError.message.includes("recursion") || adminError.message.includes("policy")) {
+          setError("Database configuration issue - please contact support to fix RLS policies")
+          return
+        }
+
+        setError(adminError.message)
+        return
+      }
+
+      if (!adminCheck) {
+        console.log("User is not an admin")
         router.push("/dashboard")
         return
       }
 
+      console.log("User is admin")
       setIsAdmin(true)
       fetchPayments()
     } catch (error) {
       console.error("Error checking admin status:", error)
-      router.push("/dashboard")
+
+      let errorMessage = "Failed to verify admin status"
+      if (error instanceof Error) {
+        if (error.message.includes("recursion") || error.message.includes("policy")) {
+          errorMessage = "Database policy configuration issue - please contact support"
+        } else {
+          errorMessage = error.message
+        }
+      }
+
+      setError(errorMessage)
     }
   }
 
   const fetchPayments = async () => {
     try {
+      console.log("Fetching payments...")
       const { data, error } = await supabase
         .from("payments")
         .select(`
@@ -91,7 +141,17 @@ export default function AdminPage() {
         `)
         .order("created_at", { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        console.error("Error fetching payments:", error)
+
+        if (error.message.includes("recursion") || error.message.includes("policy")) {
+          throw new Error("Database policy issue - please contact support")
+        }
+
+        throw error
+      }
+
+      console.log("Payments fetched:", data?.length || 0)
       setPayments(data || [])
     } catch (error) {
       console.error("Error fetching payments:", error)
@@ -155,10 +215,66 @@ export default function AdminPage() {
     return <Badge variant="secondary">Cancelled</Badge>
   }
 
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <Card className="border-red-200">
+            <CardHeader className="text-center">
+              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <CardTitle className="text-red-600">Admin Access Error</CardTitle>
+              <CardDescription className="text-gray-600">{error}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col gap-3">
+                <Button onClick={checkAdminStatus} className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Try Again
+                </Button>
+
+                <Button onClick={() => router.push("/dashboard")} variant="outline">
+                  Go to Dashboard
+                </Button>
+
+                <Button onClick={handleSignOut} variant="ghost">
+                  Sign Out
+                </Button>
+              </div>
+
+              {(error.includes("policy") || error.includes("recursion") || error.includes("function")) && (
+                <Alert className="border-yellow-200 bg-yellow-50">
+                  <AlertCircle className="h-4 w-4 text-yellow-600" />
+                  <AlertDescription className="text-yellow-800">
+                    <strong>Database Issue:</strong> Please run the RLS policy fix script
+                    (scripts/07-fix-rls-policies.sql) to resolve this issue.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  // Loading or access denied state
   if (!isAdmin || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600 text-lg">{loading ? "Loading..." : "Access Denied"}</div>
+        <div className="text-center space-y-4">
+          {loading ? (
+            <>
+              <RefreshCw className="h-8 w-8 animate-spin mx-auto text-blue-600" />
+              <div className="text-gray-600 text-lg">Checking admin permissions...</div>
+            </>
+          ) : (
+            <>
+              <AlertCircle className="h-8 w-8 mx-auto text-red-500" />
+              <div className="text-gray-600 text-lg">Access Denied</div>
+            </>
+          )}
+        </div>
       </div>
     )
   }
